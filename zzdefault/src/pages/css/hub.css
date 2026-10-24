@@ -227,7 +227,6 @@ button { display: flex; align-items: center; justify-content: center; text-align
 }
 
 /* ── Botões de like / dislike ── */
-.vote-group { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
 
 .vote-btn {
   display: flex; align-items: center; gap: 6px;
