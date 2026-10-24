@@ -7,8 +7,8 @@ import { getArticles, deleteArticle, timeAgo, getEditions, getMyVotes, castVote,
 import { formatCount } from "../votes-format.js";
 import "./css/hub.css";
 
-const INSTAGRAM_URL = "https://www.instagram.com/folhaalfanews/";
-const CONTACT_EMAIL = "folhaalfanews@gmail.com";
+const INSTAGRAM_URL = "https://www.instagram.com/choquei/";
+const CONTACT_EMAIL = "folhaalphanews@yahoo.com";
 
 /* ── Helpers de co-autoria ── */
 function formatAuthorsText(author, coauthors) {
