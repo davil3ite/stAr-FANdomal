@@ -2,58 +2,6 @@
 
 import supabase from "./supabase.js";
 
-// ── Edições ──────────────────────────────────────────────────────────────────
-
-export async function getEditions() {
-  const { data, error } = await supabase
-    .from("editions")
-    .select("*")
-    .order("number", { ascending: false });
-  if (error) return [];
-  return data;
-}
-
-export async function getEditionById(id) {
-  const { data, error } = await supabase
-    .from("editions")
-    .select("*")
-    .eq("id", id)
-    .single();
-  if (error) return null;
-  return data;
-}
-
-export async function createEdition() {
-  const { data: existing } = await supabase
-    .from("editions")
-    .select("number")
-    .order("number", { ascending: false });
-
-  const nums = new Set((existing || []).map(e => e.number));
-  let next = 1;
-  while (nums.has(next)) next++;
-
-  const { data, error } = await supabase
-    .from("editions")
-    .insert({ number: next })
-    .select()
-    .single();
-  if (error) return null;
-  return data;
-}
-
-export async function deleteEdition(id) {
-  const { data: articles } = await supabase
-    .from("articles")
-    .select("id")
-    .eq("edition_id", id)
-    .limit(1);
-  if (articles && articles.length > 0) return { ok: false, reason: "has_articles" };
-  const { error } = await supabase.from("editions").delete().eq("id", id);
-  if (error) return { ok: false, reason: "server" };
-  return { ok: true };
-}
-
 function isIdRef(obj) {
   return obj && typeof obj === "object" && obj.id !== undefined && obj.id !== null;
 }

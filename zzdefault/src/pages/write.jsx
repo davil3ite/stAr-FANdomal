@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getSession } from "../auth.js";
-import { createArticle, updateArticle, getArticleById, getEditions, createEdition, deleteEdition, setFeaturedArticle } from "../articles.js";
+import { createArticle, updateArticle, getArticleById, setFeaturedArticle } from "../articles.js";
 import { uploadImage } from "../storage.js";
 import supabase from "../supabase.js";
 import "./css/write.css";
@@ -390,12 +390,6 @@ function Write() {
   const [activeFormats, setActiveFormats] = useState({ b: false, i: false, u: false });
   const [activeAlign, setActiveAlign] = useState("Left");
 
-  const [editions, setEditions] = useState([]);
-  const [selectedEdition, setSelectedEdition] = useState(null);
-  const [editionDropdownOpen, setEditionDropdownOpen] = useState(false);
-  const [editionLoading, setEditionLoading] = useState(false);
-  const [deleteWarning, setDeleteWarning] = useState(null);
-
   const [coauthors, setCoauthors] = useState([]);
   const [coauthorModalOpen, setCoauthorModalOpen] = useState(false);
 
@@ -410,15 +404,10 @@ function Write() {
   const bodyRef = useRef(null);
   const coverInputRef = useRef(null);
   const inlineInputRef = useRef(null);
-  const editionDropdownRef = useRef(null);
   const themeOverflowRef = useRef(null);
 
   useEffect(() => {
     if (!session || (session.type !== "adm" && session.type !== "adm+")) { navigate("/"); return; }
-    getEditions().then(eds => {
-      setEditions(eds);
-      if (eds.length > 0 && !id) setSelectedEdition(eds[0]);
-    });
     if (id) {
       getArticleById(id).then(a => {
         if (a) {
@@ -434,12 +423,6 @@ function Write() {
           setFeatured(!!a.featured);
           setWasFeatured(!!a.featured);
           if (bodyRef.current) bodyRef.current.innerHTML = a.body;
-          if (a.edition_id) {
-            getEditions().then(eds => {
-              const ed = eds.find(e => e.id === a.edition_id);
-              if (ed) setSelectedEdition(ed);
-            });
-          }
         }
       });
     }
@@ -447,43 +430,12 @@ function Write() {
 
   useEffect(() => {
     function handleClickOutside(e) {
-      if (editionDropdownRef.current && !editionDropdownRef.current.contains(e.target))
-        setEditionDropdownOpen(false);
       if (themeOverflowRef.current && !themeOverflowRef.current.contains(e.target))
         setThemeOverflowOpen(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  async function handleCreateEdition() {
-    setEditionLoading(true);
-    const ed = await createEdition();
-    if (ed) {
-      const updated = await getEditions();
-      setEditions(updated);
-      setSelectedEdition(ed);
-    }
-    setEditionLoading(false);
-    setEditionDropdownOpen(false);
-  }
-
-  async function handleDeleteEdition(e, edId) {
-    e.stopPropagation();
-    if (deleteWarning === edId) {
-      const result = await deleteEdition(edId);
-      if (result.ok) {
-        const updated = await getEditions();
-        setEditions(updated);
-        if (selectedEdition?.id === edId)
-          setSelectedEdition(updated.length > 0 ? updated[0] : null);
-      }
-      setDeleteWarning(null);
-    } else {
-      setDeleteWarning(edId);
-    }
-    setTimeout(() => setDeleteWarning(v => v === edId ? null : v), 3000);
-  }
 
   function handleBodyChange() { setBody(bodyRef.current.innerHTML); }
 
@@ -608,7 +560,7 @@ function Write() {
       sources: sources.filter(s => s.url.trim()),
       author: authorData,
       coauthors: anonymous ? null : coauthorRefs,
-      editionId: selectedEdition?.id || null,
+      editionId: null,
     };
 
     // Salva o artigo e guarda o id (pra poder marcar/desmarcar o destaque).
@@ -685,59 +637,6 @@ function Write() {
 
           <div className="write-title-row">
             <h1 className="write-title">{id ? "Editar matéria" : "Nova matéria"}</h1>
-
-            {editions.length > 0 || session?.type === "adm+" ? (
-              <div className="edition-dropdown-wrap" ref={editionDropdownRef}>
-                <button
-                  className="edition-pill"
-                  onClick={() => setEditionDropdownOpen(v => !v)}
-                >
-                  {selectedEdition ? `Edição ${selectedEdition.number}` : "Sem edição"}
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginLeft: 4 }}>
-                    <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-
-                {editionDropdownOpen && (
-                  <div className="edition-dropdown">
-                    {editions.map(ed => (
-                      <div
-                        key={ed.id}
-                        className={`edition-option ${selectedEdition?.id === ed.id ? "active" : ""}`}
-                        onClick={() => { setSelectedEdition(ed); setEditionDropdownOpen(false); setDeleteWarning(null); }}
-                      >
-                        <span>Edição {ed.number}</span>
-                        {session?.type === "adm+" && (
-                          <button
-                            className={`edition-delete-btn ${deleteWarning === ed.id ? "warn" : ""}`}
-                            onClick={e => handleDeleteEdition(e, ed.id)}
-                            title={deleteWarning === ed.id ? "Clique novamente para confirmar" : "Apagar edição"}
-                          >
-                            {deleteWarning === ed.id ? "!" : "×"}
-                          </button>
-                        )}
-                      </div>
-                    ))}
-
-                    {deleteWarning && (
-                      <p className="edition-delete-warn">
-                        Apague todas as matérias desta edição antes de removê-la.
-                      </p>
-                    )}
-
-                    {session?.type === "adm+" && (
-                      <button
-                        className="edition-create-btn"
-                        onClick={handleCreateEdition}
-                        disabled={editionLoading}
-                      >
-                        {editionLoading ? "Criando..." : "+ Nova edição"}
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-            ) : null}
           </div>
 
           <CoauthorStack

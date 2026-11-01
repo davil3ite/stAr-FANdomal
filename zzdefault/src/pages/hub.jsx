@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom'
 import { getSession, logout } from "../auth.js";
-import { getArticles, deleteArticle, timeAgo, getEditions, getMyVotes, castVote, getFeaturedArticle } from "../articles.js";
+import { getArticles, deleteArticle, timeAgo, getMyVotes, castVote, getFeaturedArticle } from "../articles.js";
 import { formatCount } from "../votes-format.js";
 import "./css/hub.css";
 
@@ -102,17 +102,15 @@ function Layout() {
   const navigate = useNavigate();
   const [session, setSession] = useState(getSession());
   const [articles, setArticles] = useState([]);
-  const [editions, setEditions] = useState([]);
   // votos do usuário logado: { [article_id]: 'like' | 'dislike' }
   const [myVotes, setMyVotes] = useState({});
   // matéria em destaque marcada por adm+ (ou null se ninguém marcou)
   const [featured, setFeatured] = useState(null);
 
   useEffect(() => {
-    Promise.all([getArticles(), getEditions(), getMyVotes(), getFeaturedArticle()])
-      .then(([arts, eds, votes, feat]) => {
+    Promise.all([getArticles(), getMyVotes(), getFeaturedArticle()])
+      .then(([arts, votes, feat]) => {
         setArticles(arts);
-        setEditions(eds);
         setMyVotes(votes);
         setFeatured(feat);
       });
@@ -187,25 +185,6 @@ function Layout() {
     return session.username === article.author.username || session.type === "adm+";
   }
 
-  function groupByEdition(articles, editions) {
-    const edMap = {};
-    editions.forEach(e => { edMap[e.id] = e; });
-    const groups = {};
-    articles.forEach(a => {
-      const key = a.edition_id || "__none__";
-      if (!groups[key]) {
-        groups[key] = { edition: a.edition_id ? edMap[a.edition_id] : null, articles: [] };
-      }
-      groups[key].articles.push(a);
-    });
-    const sorted = Object.values(groups).sort((a, b) => {
-      if (!a.edition) return 1;
-      if (!b.edition) return -1;
-      return b.edition.number - a.edition.number;
-    });
-    return sorted;
-  }
-
   // Card pequeno (usado no grid de baixo)
   function ArticleCard({ a }) {
     return (
@@ -244,19 +223,10 @@ function Layout() {
   const isRealFeatured = !!featured;
   const topArticle = featured || (articles.length > 0 ? articles[0] : null);
 
-  // Edição do artigo do topo (pra mostrar "Edição N" nos campos dele)
-  const topEdition = topArticle
-    ? editions.find(e => e.id === topArticle.edition_id) || null
-    : null;
-
-  // Lista de baixo: todos menos o do topo (pra não repetir)
+  // Lista de baixo: todas menos a do topo (pra não repetir)
   const restArticles = topArticle
     ? articles.filter(a => a.id !== topArticle.id)
     : articles;
-
-  const grouped = groupByEdition(restArticles, editions);
-  const hasMultipleEditions = grouped.filter(g => g.edition !== null).length > 1 ||
-    (grouped.length === 1 && grouped[0].edition !== null);
 
   return (
     <div className="layout">
@@ -348,7 +318,6 @@ function Layout() {
                   <span className="card-type">
                     {topArticle.type}
                     {topArticle.theme ? ` • ${topArticle.theme}` : ""}
-                    {topEdition ? ` • Edição ${topEdition.number}` : ""}
                     {isRealFeatured ? " ★" : ""}
                   </span>
                   <h2 className="featured-headline">{topArticle.headline}</h2>
@@ -375,20 +344,18 @@ function Layout() {
               </div>
             </section>
 
-            {/* ── Demais notícias, agrupadas por edição ── */}
-            {grouped.map((group, gi) => (
-              <section key={gi} className="edition-section">
+            {/* ── Demais notícias (sem separar por edição) ── */}
+            {restArticles.length > 0 && (
+              <section className="edition-section">
                 <div className="section-head">
-                  <span className="section-head-label">
-                    {group.edition ? `Edição ${group.edition.number}` : "Sem edição"}
-                  </span>
+                  <span className="section-head-label">Notícias</span>
                   <span className="section-head-line" />
                 </div>
                 <div className="cards-grid">
-                  {group.articles.map(a => <ArticleCard key={a.id} a={a} />)}
+                  {restArticles.map(a => <ArticleCard key={a.id} a={a} />)}
                 </div>
               </section>
-            ))}
+            )}
 
           </div>
         )}

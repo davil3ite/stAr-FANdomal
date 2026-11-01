@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getSession } from "../auth.js";
-import { getArticleById, getEditionById, deleteArticle, getMyVotes, castVote } from "../articles.js";
+import { getArticleById, deleteArticle, getMyVotes, castVote } from "../articles.js";
 import { formatCount } from "../votes-format.js";
 import "./css/article.css";
 
@@ -98,7 +98,6 @@ function Article() {
   const session = getSession();
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const [article, setArticle] = useState(null);
-  const [edition, setEdition] = useState(null);
   const [loading, setLoading] = useState(true);
   // voto do usuário logado neste artigo: 'like' | 'dislike' | null
   const [myVote, setMyVote] = useState(null);
@@ -108,9 +107,6 @@ function Article() {
       setArticle(data);
       setMyVote(votes[id] || null);
       setLoading(false);
-      if (data?.edition_id) {
-        getEditionById(data.edition_id).then(ed => setEdition(ed));
-      }
     });
   }, [id]);
 
@@ -181,7 +177,6 @@ function Article() {
           <span className="article-type">
             {article.type}
             {article.theme && <> • {article.theme}</>}
-            {edition && <> • Edição {edition.number}</>}
           </span>
           <h1 className="article-headline">{article.headline}</h1>
           <div className="article-author-row">
