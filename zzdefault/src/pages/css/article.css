@@ -125,10 +125,10 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
 
 /* estado selecionado: vermelho do banner, símbolo branco */
 .vote-btn.active {
-  background: #FF1E2D; border-color: #FF1E2D; color: #fff;
+  background: #FF5900; border-color: #FF5900; color: #fff;
 }
 .vote-btn.active .vote-count { color: #fff; }
-.vote-btn.active:hover:not(:disabled) { border-color: #FF1E2D; }
+.vote-btn.active:hover:not(:disabled) { border-color: #FF5900; }
 
 .author-actions { display: flex; gap: 12px; margin-top: 16px; padding-top: 24px; border-top: 1px solid #e0e0e0; }
 
