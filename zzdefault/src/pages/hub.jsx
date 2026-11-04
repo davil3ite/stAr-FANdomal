@@ -198,7 +198,7 @@ function Layout() {
             {a.type}{a.theme ? ` • ${a.theme}` : ""}
           </span>
           <h2 className="card-headline">{a.headline}</h2>
-          {plainBody && <p className="card-excerpt">{plainBody.slice(0, 120)}...</p>}
+          {plainBody && <p className="card-excerpt">{plainBody}</p>}
           <div className="card-meta">
             <AuthorAvatars author={a.author} coauthors={a.coauthors} />
             <span>{formatAuthorsText(a.author, a.coauthors)}</span>
@@ -327,7 +327,7 @@ function Layout() {
                     {isRealFeatured ? " ★" : ""}
                   </span>
                   <h2 className="featured-headline">{topArticle.headline}</h2>
-                  {topPlainBody && <p className="featured-excerpt">{topPlainBody.slice(0, 260)}...</p>}
+                  {topPlainBody && <p className="featured-excerpt">{topPlainBody}</p>}
                   <div className="card-meta">
                     <AuthorAvatars author={topArticle.author} coauthors={topArticle.coauthors} />
                     <span>{formatAuthorsText(topArticle.author, topArticle.coauthors)}</span>
