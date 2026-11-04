@@ -187,15 +187,18 @@ function Layout() {
 
   // Card pequeno (usado no grid de baixo)
   function ArticleCard({ a }) {
+    // Texto do corpo sem HTML. Se vazio (matéria só com manchete),
+    // não mostra o resumo nem os "..." — o card centraliza o conteúdo.
+    const plainBody = (a.body || "").replace(/<[^>]+>/g, '').trim();
     return (
-      <div className="article-card" key={a.id} onClick={() => navigate(`/article/${a.id}`)}>
+      <div className={`article-card ${plainBody ? "" : "no-body"}`} key={a.id} onClick={() => navigate(`/article/${a.id}`)}>
         {a.cover_image && <div className="card-cover" style={{ backgroundImage: `url(${a.cover_image})` }} />}
         <div className="card-body">
           <span className="card-type">
             {a.type}{a.theme ? ` • ${a.theme}` : ""}
           </span>
           <h2 className="card-headline">{a.headline}</h2>
-          <p className="card-excerpt">{a.body.replace(/<[^>]+>/g, '').slice(0, 120)}...</p>
+          {plainBody && <p className="card-excerpt">{plainBody.slice(0, 120)}...</p>}
           <div className="card-meta">
             <AuthorAvatars author={a.author} coauthors={a.coauthors} />
             <span>{formatAuthorsText(a.author, a.coauthors)}</span>
@@ -222,6 +225,9 @@ function Layout() {
   // Define a matéria do topo: a marcada como destaque OU, se não houver, a mais recente.
   const isRealFeatured = !!featured;
   const topArticle = featured || (articles.length > 0 ? articles[0] : null);
+
+  // Resumo do destaque (vazio quando a matéria é só manchete).
+  const topPlainBody = topArticle ? (topArticle.body || "").replace(/<[^>]+>/g, '').trim() : "";
 
   // Lista de baixo: todas menos a do topo (pra não repetir)
   const restArticles = topArticle
@@ -310,7 +316,7 @@ function Layout() {
                 <span className="section-head-line" />
               </div>
 
-              <div className="featured-card" onClick={() => navigate(`/article/${topArticle.id}`)}>
+              <div className={`featured-card ${topPlainBody ? "" : "no-body"}`} onClick={() => navigate(`/article/${topArticle.id}`)}>
                 {topArticle.cover_image && (
                   <div className="featured-cover" style={{ backgroundImage: `url(${topArticle.cover_image})` }} />
                 )}
@@ -321,7 +327,7 @@ function Layout() {
                     {isRealFeatured ? " ★" : ""}
                   </span>
                   <h2 className="featured-headline">{topArticle.headline}</h2>
-                  <p className="featured-excerpt">{topArticle.body.replace(/<[^>]+>/g, '').slice(0, 260)}...</p>
+                  {topPlainBody && <p className="featured-excerpt">{topPlainBody.slice(0, 260)}...</p>}
                   <div className="card-meta">
                     <AuthorAvatars author={topArticle.author} coauthors={topArticle.coauthors} />
                     <span>{formatAuthorsText(topArticle.author, topArticle.coauthors)}</span>

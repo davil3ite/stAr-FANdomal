@@ -14,7 +14,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
 
 .header {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  background: #FF5900 !important; border-bottom: 1px solid #ff5900c7 !important; 
+  background: #FF1E2D; border-bottom: 1px solid rgb(215, 41, 41);
   height: 64px; display: flex; align-items: center;
   justify-content: space-between; padding: 0 20px;
   z-index: 300 !important;
@@ -30,7 +30,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
   display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 5px;
   transition: border-color 0.2s, background 0.2s;
 }
-.menu-btn:hover { border-color: #FDF4F6; background: #ff5900c7 !important; }
+.menu-btn:hover { border-color: #FDF4F6; background: rgb(215, 41, 41); }
 .menu-btn span { display: block; width: 18px; height: 1.5px; background: #FDF4F6; transition: transform 0.3s, opacity 0.3s; transform-origin: center; }
 .menu-btn.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
 .menu-btn.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
@@ -42,7 +42,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
   font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 500; cursor: pointer;
   transition: border-color 0.2s, color 0.2s; letter-spacing: 0.02em;
 }
-.btn-login:hover { background: #ff5900c7 !important; border-color: #FDF4F6 !important; color: #FDF4F6 !important; }
+.btn-login:hover { background: rgb(215, 41, 41) !important; border-color: #FDF4F6 !important; color: #FDF4F6 !important; }
 
 .btn-signup {
   background: none !important; border: 1px solid #FDF4F6 !important; color: #FDF4F6 !important;
@@ -50,12 +50,12 @@ button { display: flex; align-items: center; justify-content: center; text-align
   font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 600; cursor: pointer;
   transition: background 0.2s; letter-spacing: 0.02em;
 }
-.btn-signup:hover { background: #ff5900c7 !important; border-color: #FDF4F6 !important; color: #FDF4F6 !important; }
+.btn-signup:hover { background: rgb(215, 41, 41) !important; border-color: #FDF4F6 !important; color: #FDF4F6 !important; }
 
 /* ── Botão único Log-In / Sign-Up ── */
 .btn-auth {
   display: flex; align-items: center; gap: 9px;
-  background: #FF5900; border: 1px solid #FDF4F6; color: #FDF4F6;
+  background: #FF1E2D; border: 1px solid #FDF4F6; color: #FDF4F6;
   padding: 7px 18px 7px 10px; border-radius: 999px; /* 100% redondo */
   font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
   cursor: pointer; white-space: nowrap;
@@ -67,7 +67,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
   object-fit: cover; display: block; flex-shrink: 0;
 }
 /* versão na sidebar (fundo branco da sidebar): borda vermelha pra aparecer */
-.sb-auth { border-color: #FF5900; }
+.sb-auth { border-color: #FF1E2D; }
 
 .sidebar-overlay {
   position: fixed; inset: 0; z-index: 90;
@@ -135,7 +135,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
   white-space: nowrap;
   line-height: 1;
 }
-.section-star { color: #FF5900; }
+.section-star { color: #FF1E2D; }
 .section-head-line {
   flex: 1;
   height: 2px;
@@ -196,6 +196,11 @@ button { display: flex; align-items: center; justify-content: center; text-align
 .card-excerpt { font-size: 13px; color: #666; line-height: 1.6; }
 .card-meta { display: flex; gap: 10px; font-size: 11px; color: #aaa; margin-top: 4px; align-items: center; flex-wrap: wrap; }
 
+/* Matéria só com manchete (sem corpo): centraliza o conteúdo no card,
+   já que não há resumo pra preencher o espaço. */
+.article-card.no-body .card-body { justify-content: center; }
+.featured-card.no-body .featured-body { justify-content: center; }
+
 /* Telas estreitas: destaque vira coluna (capa em cima) */
 @media (max-width: 680px) {
   .featured-card { flex-direction: column; }
@@ -248,10 +253,10 @@ button { display: flex; align-items: center; justify-content: center; text-align
 
 /* estado selecionado: vermelho do banner, símbolo branco */
 .vote-btn.active {
-  background: #FF5900; border-color: #FF5900; color: #fff;
+  background: #FF1E2D; border-color: #FF1E2D; color: #fff;
 }
 .vote-btn.active .vote-count { color: #fff; }
-.vote-btn.active:hover:not(:disabled) { border-color: #FF5900; }
+.vote-btn.active:hover:not(:disabled) { border-color: #FF1E2D; }
 
 .card-actions { display: flex; gap: 6px; margin-top: 6px; }
 .card-action-btn {
@@ -261,7 +266,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
   transition: border-color 0.2s, background 0.2s; padding: 0;
 }
 .card-action-btn:hover { border-color: #999; background: #f0f0f0; }
-.card-action-btn.delete:hover { border-color: #FF5900; background: rgba(224,85,85,0.06); }
+.card-action-btn.delete:hover { border-color: #e05555; background: rgba(224,85,85,0.06); }
 
 .btn-write {
   background: none; border: 1px solid #FDF4F6; color: #FDF4F6;
@@ -269,7 +274,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
   font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 600; cursor: pointer;
   transition: border-color 0.2s, color 0.2s; letter-spacing: 0.02em;
 }
-.btn-write:hover { border-color: #FDF4F6; color: #FDF4F6; background-color: #ff5900c7;}
+.btn-write:hover { border-color: #FDF4F6; color: #FDF4F6; background-color: rgb(215, 41, 41);}
 
 .header-profile-btn { display: flex; align-items: center; gap: 6px; background: none; border: none; cursor: pointer; padding: 0; }
 .header-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd; }
@@ -289,7 +294,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
 
 .footer {
   height: 48px;
-  background: #FF5900 !important; border-top: 1px solid #ff5900c7 !important;
+  background: #FF1E2D !important; border-top: 1px solid rgb(215, 41, 41) !important;
   display: flex; align-items: center; justify-content: center;
   gap: 12px; padding: 0 32px; z-index: 100;
 }
