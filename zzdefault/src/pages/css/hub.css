@@ -55,13 +55,13 @@ button { display: flex; align-items: center; justify-content: center; text-align
 /* ── Botão único Log-In / Sign-Up ── */
 .btn-auth {
   display: flex; align-items: center; gap: 9px;
-  background: #FF1E2D; border: 1px solid #FDF4F6; color: #FDF4F6;
+  background: #FF5900 !important; border: 1px solid #FDF4F6; color: #FDF4F6;
   padding: 7px 18px 7px 10px; border-radius: 999px; /* 100% redondo */
   font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
   cursor: pointer; white-space: nowrap;
   transition: background 0.2s;
 }
-.btn-auth:hover { background: rgb(215, 41, 41); border-color: #FDF4F6; color: #FDF4F6; }
+.btn-auth:hover { background: #ff5900c7 !important; border-color: #FDF4F6; color: #FDF4F6; }
 .btn-auth-icon {
   width: 26px; height: 26px; border-radius: 50%;
   object-fit: cover; display: block; flex-shrink: 0;
@@ -160,6 +160,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
 .featured-cover {
   width: 40%; min-width: 240px; flex-shrink: 0;
   background-size: cover; background-position: center; background-color: #111;
+  cursor: pointer;
 }
 .featured-body {
   flex: 1; padding: 24px 28px;
@@ -187,7 +188,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
   border: 1px solid #e0e0e0; background: #fff; width: 100%;
 }
 
-.card-cover { width: 200px; flex-shrink: 0; align-self: stretch; min-height: 150px; background-size: cover; background-position: center; background-color: #111; }
+.card-cover { width: 200px; flex-shrink: 0; align-self: stretch; min-height: 150px; background-size: cover; background-position: center; background-color: #111; cursor: pointer; }
 .card-body { padding: 14px 18px; display: flex; flex-direction: column; gap: 7px; flex: 1; }
 
 .card-type { font-family: 'DM Sans', sans-serif; font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #999; }
@@ -200,6 +201,30 @@ button { display: flex; align-items: center; justify-content: center; text-align
 .article-card.no-body .card-body { justify-content: center; }
 .featured-card.no-body .featured-body { justify-content: center; }
 
+/* ── Lightbox: imagem da capa ampliada ── */
+.img-lightbox {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.82);
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px; cursor: zoom-out;
+}
+.img-lightbox-img {
+  max-width: 90vw; max-height: 90vh;
+  width: auto; height: auto;
+  object-fit: contain; /* mostra a imagem inteira, sem cortar */
+  border-radius: 8px; box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  cursor: default;
+}
+.img-lightbox-close {
+  position: fixed; top: 20px; right: 24px;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.4);
+  color: #fff; font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.img-lightbox-close:hover { background: rgba(255,255,255,0.3); }
+
 /* Telas estreitas: destaque e cards viram coluna (capa em cima) */
 @media (max-width: 680px) {
   .featured-card { flex-direction: column; }
@@ -207,6 +232,9 @@ button { display: flex; align-items: center; justify-content: center; text-align
   .featured-body { padding: 24px 22px; }
   .article-card { flex-direction: column; }
   .card-cover { width: 100%; min-height: 160px; height: 160px; }
+  /* no celular a imagem cabe na tela (fit) */
+  .img-lightbox { padding: 16px; }
+  .img-lightbox-img { max-width: 96vw; max-height: 86vh; }
 }
 
 .card-avatars {
@@ -257,7 +285,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
   background: #FF1E2D; border-color: #FF1E2D; color: #fff;
 }
 .vote-btn.active .vote-count { color: #fff; }
-.vote-btn.active:hover:not(:disabled) { border-color: #FF1E2D; }
+.vote-btn.active:hover:not(:disabled) { border-color: #FF5900; }
 
 .card-actions { display: flex; gap: 6px; margin-top: 6px; }
 .card-action-btn {
@@ -275,7 +303,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
   font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 600; cursor: pointer;
   transition: border-color 0.2s, color 0.2s; letter-spacing: 0.02em;
 }
-.btn-write:hover { border-color: #FDF4F6; color: #FDF4F6; background-color: rgb(215, 41, 41);}
+.btn-write:hover { border-color: #FDF4F6; color: #FDF4F6; background-color: #ff5900c7;}
 
 .header-profile-btn { display: flex; align-items: center; gap: 6px; background: none; border: none; cursor: pointer; padding: 0; }
 .header-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd; }

@@ -106,6 +106,8 @@ function Layout() {
   const [myVotes, setMyVotes] = useState({});
   // matéria em destaque marcada por adm+ (ou null se ninguém marcou)
   const [featured, setFeatured] = useState(null);
+  // URL da imagem aberta ampliada (lightbox), ou null se nenhuma
+  const [zoomImg, setZoomImg] = useState(null);
 
   useEffect(() => {
     Promise.all([getArticles(), getMyVotes(), getFeaturedArticle()])
@@ -115,6 +117,19 @@ function Layout() {
         setFeatured(feat);
       });
   }, []);
+
+  // Abre a capa ampliada (lightbox).
+  function openZoom(url) {
+    if (url) setZoomImg(url);
+  }
+
+  // Fecha o lightbox ao apertar Esc.
+  useEffect(() => {
+    if (!zoomImg) return;
+    function onKey(e) { if (e.key === "Escape") setZoomImg(null); }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [zoomImg]);
 
   function handleLogout() { logout(); setSession(null); navigate('/'); }
 
@@ -192,7 +207,14 @@ function Layout() {
     const plainBody = (a.body || "").replace(/<[^>]+>/g, '').trim();
     return (
       <div className={`article-card ${plainBody ? "" : "no-body"}`} key={a.id}>
-        {a.cover_image && <div className="card-cover" style={{ backgroundImage: `url(${a.cover_image})` }} />}
+        {a.cover_image && (
+          <div
+            className="card-cover"
+            style={{ backgroundImage: `url(${a.cover_image})` }}
+            onClick={() => openZoom(a.cover_image)}
+            title="Ampliar imagem"
+          />
+        )}
         <div className="card-body">
           <span className="card-type">
             {a.type}{a.theme ? ` • ${a.theme}` : ""}
@@ -318,7 +340,12 @@ function Layout() {
 
               <div className={`featured-card ${topPlainBody ? "" : "no-body"}`}>
                 {topArticle.cover_image && (
-                  <div className="featured-cover" style={{ backgroundImage: `url(${topArticle.cover_image})` }} />
+                  <div
+                    className="featured-cover"
+                    style={{ backgroundImage: `url(${topArticle.cover_image})` }}
+                    onClick={() => openZoom(topArticle.cover_image)}
+                    title="Ampliar imagem"
+                  />
                 )}
                 <div className="featured-body">
                   <span className="card-type">
@@ -366,6 +393,19 @@ function Layout() {
           </div>
         )}
       </main>
+
+      {/* ── Lightbox: imagem ampliada ── */}
+      {zoomImg && (
+        <div className="img-lightbox" onClick={() => setZoomImg(null)}>
+          <button className="img-lightbox-close" onClick={() => setZoomImg(null)} aria-label="Fechar">✕</button>
+          <img
+            src={zoomImg}
+            alt=""
+            className="img-lightbox-img"
+            onClick={e => e.stopPropagation()}
+          />
+        </div>
+      )}
 
       <footer className="footer">
         <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="footer-link">
