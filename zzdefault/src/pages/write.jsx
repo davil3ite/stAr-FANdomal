@@ -528,7 +528,6 @@ function Write() {
 
   async function handlePublish() {
     if (!headline.trim()) { setError("A manchete é obrigatória."); return; }
-    if (!body.trim() || body === "<br>") { setError("O texto é obrigatório."); return; }
     if (!anonymous && session?.id == null) {
       setError("Sessão inválida. Faça login novamente e tente de novo.");
       return;
