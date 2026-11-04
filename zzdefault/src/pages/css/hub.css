@@ -14,7 +14,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
 
 .header {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  background: #FF1E2D; border-bottom: 1px solid rgb(215, 41, 41);
+  background: #FF5900 !important; border-bottom: 1px solid #ff5900c7 !important; 
   height: 64px; display: flex; align-items: center;
   justify-content: space-between; padding: 0 20px;
   z-index: 300 !important;
@@ -291,7 +291,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
 
 .footer {
   height: 48px;
-  background: #FF1E2D !important; border-top: 1px solid rgb(215, 41, 41) !important;
+  background: #FF5900 !important; border-bottom: 1px solid #ff5900c7 !important; 
   display: flex; align-items: center; justify-content: center;
   gap: 12px; padding: 0 32px; z-index: 100;
 }
