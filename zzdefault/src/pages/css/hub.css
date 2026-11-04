@@ -14,7 +14,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
 
 .header {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  background: #FF5900 !important; border-bottom: 1px solid #ff5900c7 !important; 
+  background: #FF1E2D; border-bottom: 1px solid rgb(215, 41, 41);
   height: 64px; display: flex; align-items: center;
   justify-content: space-between; padding: 0 20px;
   z-index: 300 !important;
@@ -154,10 +154,8 @@ button { display: flex; align-items: center; justify-content: center; text-align
   display: flex; flex-direction: row;
   border-radius: 14px; overflow: hidden;
   border: 1px solid #e0e0e0; background: #fff;
-  cursor: pointer; transition: border-color 0.2s, transform 0.2s;
   min-height: 300px;
 }
-.featured-card:hover { border-color: #aaa; transform: translateY(-2px); }
 
 .featured-cover {
   width: 45%; min-width: 280px; flex-shrink: 0;
@@ -184,9 +182,8 @@ button { display: flex; align-items: center; justify-content: center; text-align
 
 .article-card {
   display: flex; flex-direction: column; border-radius: 12px; overflow: hidden;
-  border: 1px solid #e0e0e0; cursor: pointer; transition: border-color 0.2s, transform 0.2s; background: #fff;
+  border: 1px solid #e0e0e0; background: #fff;
 }
-.article-card:hover { border-color: #aaa; transform: translateY(-2px); }
 
 .card-cover { width: 100%; height: 160px; flex-shrink: 0; background-size: cover; background-position: center; background-color: #111; }
 .card-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
@@ -294,7 +291,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
 
 .footer {
   height: 48px;
-  background: #FF5900 !important; border-bottom: 1px solid #ff5900c7 !important; 
+  background: #FF1E2D !important; border-top: 1px solid rgb(215, 41, 41) !important;
   display: flex; align-items: center; justify-content: center;
   gap: 12px; padding: 0 32px; z-index: 100;
 }

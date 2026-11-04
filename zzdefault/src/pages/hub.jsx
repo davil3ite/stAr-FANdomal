@@ -191,7 +191,7 @@ function Layout() {
     // não mostra o resumo nem os "..." — o card centraliza o conteúdo.
     const plainBody = (a.body || "").replace(/<[^>]+>/g, '').trim();
     return (
-      <div className={`article-card ${plainBody ? "" : "no-body"}`} key={a.id} onClick={() => navigate(`/article/${a.id}`)}>
+      <div className={`article-card ${plainBody ? "" : "no-body"}`} key={a.id}>
         {a.cover_image && <div className="card-cover" style={{ backgroundImage: `url(${a.cover_image})` }} />}
         <div className="card-body">
           <span className="card-type">
@@ -316,7 +316,7 @@ function Layout() {
                 <span className="section-head-line" />
               </div>
 
-              <div className={`featured-card ${topPlainBody ? "" : "no-body"}`} onClick={() => navigate(`/article/${topArticle.id}`)}>
+              <div className={`featured-card ${topPlainBody ? "" : "no-body"}`}>
                 {topArticle.cover_image && (
                   <div className="featured-cover" style={{ backgroundImage: `url(${topArticle.cover_image})` }} />
                 )}
