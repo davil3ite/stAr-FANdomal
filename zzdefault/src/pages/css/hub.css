@@ -283,7 +283,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
 .vote-btn:disabled { cursor: default; opacity: 0.85; }
 
 .vote-btn.active {
-  background: #FF1E2D; border-color: #FF1E2D; color: #fff;
+  background: #FF5900 !important; border-color: #FF5900 !important; color: #fff;
 }
 .vote-btn.active .vote-count { color: #fff; }
 .vote-btn.active:hover:not(:disabled) { border-color: #FF5900; }
