@@ -95,7 +95,6 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
 .sources-list a { color: #555; font-size: 13px; text-decoration: underline; transition: color 0.2s; }
 .sources-list a:hover { color: #111; }
 
-/* ── "Gostou desse artigo?" + botões de like/dislike ── */
 .article-rate {
   display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
   margin-top: 24px; padding-top: 24px; border-top: 1px solid #e0e0e0;
@@ -110,20 +109,19 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
   display: flex; align-items: center; gap: 7px;
   background: none; border: 1px solid #ccc; border-radius: 999px;
   padding: 8px 16px; cursor: pointer;
-  color: #888; /* símbolo cinza no estado estático */
+  color: #888;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
   font-family: 'DM Sans', sans-serif;
 }
 .vote-btn svg { fill: currentColor; display: block; }
 .vote-btn .vote-count {
   font-size: 13px; font-weight: 500;
-  color: #888; /* mesma cor do texto do autor na página */
+  color: #888;
   line-height: 1;
 }
 .vote-btn:hover:not(:disabled) { border-color: #999; }
 .vote-btn:disabled { cursor: default; opacity: 0.85; }
 
-/* estado selecionado: vermelho do banner, símbolo branco */
 .vote-btn.active {
   background: #FF5900; border-color: #FF5900; color: #fff;
 }

@@ -394,17 +394,15 @@ function Write() {
   const [coauthorModalOpen, setCoauthorModalOpen] = useState(false);
 
   const [anonymous, setAnonymous] = useState(false);
-  // Matéria em destaque — só adm+ vê/usa.
+
   const [featured, setFeatured] = useState(false);
   const [wasFeatured, setWasFeatured] = useState(false);
   const isAdmPlus = session?.type === "adm+";
 
-  // ── Vídeo ──
-  // isVideo = a postagem é um vídeo (esconde texto + imagem de capa).
   const [isVideo, setIsVideo] = useState(false);
-  const [videoUrl, setVideoUrl] = useState("");      // URL já salva (edição)
-  const [videoPreview, setVideoPreview] = useState(""); // preview local (objectURL) ou URL salva
-  const [videoFile, setVideoFile] = useState(null);     // arquivo novo a subir
+  const [videoUrl, setVideoUrl] = useState("");
+  const [videoPreview, setVideoPreview] = useState("");
+  const [videoFile, setVideoFile] = useState(null);
 
   const bodyRef = useRef(null);
   const coverInputRef = useRef(null);
@@ -548,7 +546,6 @@ function Write() {
       setError("Sessão inválida. Faça login novamente e tente de novo.");
       return;
     }
-    // Se é vídeo, precisa ter um vídeo (novo ou já salvo).
     if (isVideo && !videoFile && !videoUrl) {
       setError("Envie um vídeo para publicar.");
       return;
@@ -563,10 +560,8 @@ function Write() {
       ? coauthors.map(c => (c.id != null ? { id: c.id } : c))
       : null;
 
-    // Monta os campos de conteúdo conforme seja vídeo ou texto.
     let data;
     if (isVideo) {
-      // Sobe o vídeo novo, se houver.
       let vUrl = videoUrl;
       if (videoFile) {
         const up = await uploadVideo(videoFile, "videos");
@@ -577,8 +572,8 @@ function Write() {
         type,
         theme,
         headline: headline.trim(),
-        body: "",            // vídeo não tem corpo de texto
-        coverImage: "",      // nem imagem de capa
+        body: "",
+        coverImage: "",
         images: [],
         sources: sources.filter(s => s.url.trim()),
         author: authorData,
@@ -588,7 +583,6 @@ function Write() {
         videoUrl: vUrl,
       };
     } else {
-      // Matéria normal (texto + imagem de capa).
       let coverUrl = coverImage;
       if (coverFile) {
         const up = await uploadImage(coverFile, "capas");
@@ -611,7 +605,6 @@ function Write() {
       };
     }
 
-    // Salva o artigo e guarda o id (pra poder marcar/desmarcar o destaque).
     let articleId = id;
     if (id) {
       await updateArticle(id, data);
@@ -620,7 +613,6 @@ function Write() {
       articleId = created?.id || null;
     }
 
-    // Destaque: só adm+ consegue mexer.
     if (isAdmPlus && articleId) {
       if (featured) {
         await setFeaturedArticle(articleId);
@@ -680,7 +672,6 @@ function Write() {
               </>
             )}
 
-            {/* Checkbox "É vídeo?" — disponível pra qualquer adm */}
             <label className="anonymous-checkbox-label">
               <input
                 type="checkbox"
@@ -688,7 +679,7 @@ function Write() {
                 checked={isVideo}
                 onChange={() => { setIsVideo(v => !v); setError(""); }}
               />
-              <span>Postagem de vídeo 🎬</span>
+              <span>Vídeo</span>
             </label>
           </div>
 
@@ -755,7 +746,6 @@ function Write() {
             <input type="text" placeholder="Título da matéria" value={headline} onChange={e => { setHeadline(e.target.value); setError(""); }} />
           </div>
 
-          {/* ── Conteúdo: VÍDEO ou (imagem de capa + texto) ── */}
           {isVideo ? (
             <div className="write-field">
               <label>Vídeo</label>

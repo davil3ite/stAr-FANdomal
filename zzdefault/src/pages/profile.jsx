@@ -37,7 +37,6 @@ function Profile() {
     const file = e.target.files[0];
     if (!file) return;
     flash("Enviando foto...");
-    // Sobe a imagem para o Storage e salva só a URL
     const up = await uploadImage(file, "avatares");
     if (!up.ok) { flash("Erro ao enviar foto.", false); return; }
     const result = await updateAvatar(session.username, up.url);

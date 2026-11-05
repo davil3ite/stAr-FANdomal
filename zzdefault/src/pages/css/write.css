@@ -33,7 +33,6 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
   padding-bottom: 60px;
 }
 
-/* Linha dos checkboxes (anônimo + destaque) */
 .write-toggles {
   display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
   margin-bottom: -8px;
@@ -167,7 +166,6 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
 }
 .coauthor-add-btn:hover { border-color: #999; color: #555; }
 
-/* Tooltip de co-autores */
 .coauthor-tooltip {
   position: absolute; top: calc(100% + 8px); left: 0; z-index: 300;
   background: #fff; border: 1px solid #e0e0e0; border-radius: 10px;
@@ -338,7 +336,6 @@ body { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #f5f5f
 
 .cover-preview { width: 100%; max-height: 240px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; margin-top: 4px; }
 
-/* Preview do vídeo escolhido na tela de escrever */
 .video-preview { width: 100%; max-height: 360px; border-radius: 8px; border: 1px solid #ddd; margin-top: 4px; background: #000; }
 
 .editor-toolbar {

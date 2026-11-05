@@ -54,7 +54,6 @@ function AuthorAvatars({ author, coauthors }) {
   );
 }
 
-/* ── Botões de like/dislike (versão da página do artigo) ── */
 function VoteButtons({ likes, dislikes, myVote, onVote, logged }) {
   function handle(value) {
     if (!logged) return;
@@ -99,7 +98,6 @@ function Article() {
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
-  // voto do usuário logado neste artigo: 'like' | 'dislike' | null
   const [myVote, setMyVote] = useState(null);
 
   useEffect(() => {
@@ -110,12 +108,10 @@ function Article() {
     });
   }, [id]);
 
-  // Clique num botão de voto.
   async function handleVote(value) {
     const prevVote = myVote;
     if (prevVote === value) return;
 
-    // 1. Atualiza na hora (otimista)
     setMyVote(value);
     setArticle(prev => {
       if (!prev) return prev;
@@ -128,7 +124,6 @@ function Article() {
       return { ...prev, like: Math.max(0, like), dislike: Math.max(0, dislike) };
     });
 
-    // 2. Grava. Se falhar, desfaz.
     const res = await castVote(id, value);
     if (!res.ok) {
       setMyVote(prevVote);

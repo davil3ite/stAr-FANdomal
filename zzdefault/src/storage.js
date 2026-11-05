@@ -20,8 +20,6 @@ export async function uploadImage(file, pasta) {
   return { ok: true, url: data.publicUrl };
 }
 
-// Sobe um VÍDEO pro mesmo bucket (na pasta "videos" por padrão).
-// Sem limite de tamanho — atenção: vídeo pesa no Storage e no egress.
 export async function uploadVideo(file, pasta = "videos") {
   if (!file) return { ok: false };
 
@@ -37,7 +35,6 @@ export async function uploadVideo(file, pasta = "videos") {
     });
 
   if (error) {
-    // Mostra o motivo real do erro no console pra diagnóstico.
     console.error("uploadVideo falhou:", error);
     return { ok: false, reason: error.message || "upload_error" };
   }

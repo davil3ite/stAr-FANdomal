@@ -10,9 +10,7 @@ import "./css/hub.css";
 const INSTAGRAM_URL = "https://www.instagram.com/choquei/";
 const CONTACT_EMAIL = "folhaalphanews@yahoo.com";
 
-/* ── Helpers de co-autoria ── */
 function formatAuthorsText(author, coauthors) {
-  // Autoria anônima
   if (author === "anonymous") return "Autoria Anônima";
 
   const all = [author, ...(coauthors || [])];
@@ -24,7 +22,6 @@ function formatAuthorsText(author, coauthors) {
 }
 
 function AuthorAvatars({ author, coauthors }) {
-  // Autoria anônima: exibe avatar padrão preto
   if (author === "anonymous") {
     return (
       <div className="card-avatars">
@@ -57,9 +54,7 @@ function AuthorAvatars({ author, coauthors }) {
   );
 }
 
-/* ── Botões de like/dislike ── */
 function VoteButtons({ likes, dislikes, myVote, onVote, logged }) {
-  // Clique: se já tava marcado nessa opção, tira (null); senão marca.
   function handle(e, value) {
     e.stopPropagation();
     if (!logged) return;
@@ -97,9 +92,7 @@ function VoteButtons({ likes, dislikes, myVote, onVote, logged }) {
   );
 }
 
-/* ── Prévia de vídeo no card: primeiro frame + botão de play ── */
 function VideoThumb({ url, onOpen }) {
-  // O <video> mostra o primeiro frame como prévia estática (sem autoplay).
   return (
     <div className="card-cover video-cover" onClick={() => onOpen(url)} title="Reproduzir vídeo">
       <video src={url} className="video-cover-media" preload="metadata" muted playsInline />
@@ -115,11 +108,8 @@ function Layout() {
   const navigate = useNavigate();
   const [session, setSession] = useState(getSession());
   const [articles, setArticles] = useState([]);
-  // votos do usuário logado: { [article_id]: 'like' | 'dislike' }
   const [myVotes, setMyVotes] = useState({});
-  // matéria em destaque marcada por adm+ (ou null se ninguém marcou)
   const [featured, setFeatured] = useState(null);
-  // lightbox aberto: { url, isVideo } ou null
   const [lightbox, setLightbox] = useState(null);
 
   useEffect(() => {
@@ -131,11 +121,9 @@ function Layout() {
       });
   }, []);
 
-  // Abre o lightbox (imagem ou vídeo).
   function openImage(url) { if (url) setLightbox({ url, isVideo: false }); }
   function openVideo(url) { if (url) setLightbox({ url, isVideo: true }); }
 
-  // Fecha o lightbox ao apertar Esc.
   useEffect(() => {
     if (!lightbox) return;
     function onKey(e) { if (e.key === "Escape") setLightbox(null); }
@@ -154,12 +142,10 @@ function Layout() {
     }
   }
 
-  // Clique num botão de voto. Atualiza o card na lista E o destaque (se for o mesmo).
   async function handleVote(articleId, value) {
     const prevVote = myVotes[articleId] || null;
-    if (prevVote === value) return; // nada muda
+    if (prevVote === value) return;
 
-    // função que recalcula like/dislike de um artigo
     const applyDelta = (a) => {
       if (a.id !== articleId) return a;
       let like = a.like || 0;
@@ -181,7 +167,6 @@ function Layout() {
       return { ...a, like: Math.max(0, like), dislike: Math.max(0, dislike) };
     };
 
-    // 1. Atualiza a tela na hora (otimista)
     setMyVotes(prev => {
       const next = { ...prev };
       if (value === null) delete next[articleId];
@@ -191,7 +176,6 @@ function Layout() {
     setArticles(prev => prev.map(applyDelta));
     setFeatured(prev => (prev ? applyDelta(prev) : prev));
 
-    // 2. Grava no banco. Se falhar, desfaz.
     const res = await castVote(articleId, value);
     if (!res.ok) {
       setMyVotes(prev => {
@@ -207,18 +191,15 @@ function Layout() {
 
   function canEdit(article) {
     if (!session) return false;
-    // Artigos anônimos: só adm+ pode editar
+
     if (article.author === "anonymous") return session.type === "adm+";
     return session.username === article.author.username || session.type === "adm+";
   }
 
-  // Card pequeno (usado no grid de baixo)
   function ArticleCard({ a }) {
-    // Texto do corpo sem HTML. Se vazio (matéria só com manchete),
-    // não mostra o resumo nem os "..." — o card centraliza o conteúdo.
     const plainBody = (a.body || "").replace(/<[^>]+>/g, '').trim();
     const isVideo = !!a.is_video && !!a.video_url;
-    // vídeo não tem corpo, então trata como "no-body" (centraliza)
+
     const noBody = isVideo || !plainBody;
     return (
       <div className={`article-card ${noBody ? "no-body" : ""}`} key={a.id}>
@@ -263,16 +244,14 @@ function Layout() {
     );
   }
 
-  // Define a matéria do topo: a marcada como destaque OU, se não houver, a mais recente.
   const isRealFeatured = !!featured;
   const topArticle = featured || (articles.length > 0 ? articles[0] : null);
 
   const topIsVideo = topArticle ? (!!topArticle.is_video && !!topArticle.video_url) : false;
-  // Resumo do destaque (vazio quando é vídeo ou matéria só com manchete).
+
   const topPlainBody = (topArticle && !topIsVideo) ? (topArticle.body || "").replace(/<[^>]+>/g, '').trim() : "";
   const topNoBody = topIsVideo || !topPlainBody;
 
-  // Lista de baixo: todas menos a do topo (pra não repetir)
   const restArticles = topArticle
     ? articles.filter(a => a.id !== topArticle.id)
     : articles;
@@ -349,7 +328,6 @@ function Layout() {
         {!topArticle ? <p className="page-hint"></p> : (
           <div className="home-wrap">
 
-            {/* ── Matéria em destaque (ou mais recente) ── */}
             <section className="featured-section">
               <div className="section-head">
                 <span className="section-head-label">
@@ -407,7 +385,6 @@ function Layout() {
               </div>
             </section>
 
-            {/* ── Demais notícias (sem separar por edição) ── */}
             {restArticles.length > 0 && (
               <section className="edition-section">
                 <div className="section-head">
@@ -424,7 +401,6 @@ function Layout() {
         )}
       </main>
 
-      {/* ── Lightbox: imagem ou vídeo ampliado ── */}
       {lightbox && (
         <div className="img-lightbox" onClick={() => setLightbox(null)}>
           <button className="img-lightbox-close" onClick={() => setLightbox(null)} aria-label="Fechar">✕</button>

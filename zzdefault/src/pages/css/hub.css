@@ -52,7 +52,6 @@ button { display: flex; align-items: center; justify-content: center; text-align
 }
 .btn-signup:hover { background: rgb(215, 41, 41) !important; border-color: #FDF4F6 !important; color: #FDF4F6 !important; }
 
-/* ── Botão único Log-In / Sign-Up ── */
 .btn-auth {
   display: flex; align-items: center; gap: 9px;
   background: #FF5900 !important; border: 1px solid #FDF4F6; color: #FDF4F6;
@@ -66,7 +65,6 @@ button { display: flex; align-items: center; justify-content: center; text-align
   width: 26px; height: 26px; border-radius: 50%;
   object-fit: cover; display: block; flex-shrink: 0;
 }
-/* versão na sidebar (fundo branco da sidebar): borda vermelha pra aparecer */
 .sb-auth { border-color: #FF1E2D; }
 
 .sidebar-overlay {
@@ -113,15 +111,13 @@ button { display: flex; align-items: center; justify-content: center; text-align
 
 .page-hint { color: #aaa; font-family: 'Syne', sans-serif; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
 
-/* ── Container geral da home ── */
 .home-wrap {
   max-width: 1500px; width: 100%;
   padding: 32px 48px;
   display: flex; flex-direction: column;
-  gap: 24px; /* distância entre destaque e as seções de baixo (bem menor que antes) */
+  gap: 24px;
 }
 
-/* Cabeçalho de seção: título + linha pontilhada */
 .section-head {
   display: flex; align-items: center; gap: 16px;
 }
@@ -147,7 +143,6 @@ button { display: flex; align-items: center; justify-content: center; text-align
   border-radius: 1px;
 }
 
-/* ── Matéria em destaque (card grande) ── */
 .featured-section { display: flex; flex-direction: column; gap: 16px; }
 
 .featured-card {
@@ -172,17 +167,14 @@ button { display: flex; align-items: center; justify-content: center; text-align
 }
 .featured-excerpt { font-size: 13px; color: #555; line-height: 1.6; }
 
-/* ── Seções de edições (grid de cards) ── */
 .edition-section { display: flex; flex-direction: column; gap: 18px; }
 
-/* 1 notícia por linha, ocupando toda a largura da seção */
 .cards-grid {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-/* Card de notícia: deitado (capa na lateral), largura total */
 .article-card {
   display: flex; flex-direction: row; border-radius: 12px; overflow: hidden;
   border: 1px solid #e0e0e0; background: #fff; width: 100%;
@@ -196,12 +188,9 @@ button { display: flex; align-items: center; justify-content: center; text-align
 .card-excerpt { font-size: 12px; color: #666; line-height: 1.55; }
 .card-meta { display: flex; gap: 10px; font-size: 11px; color: #aaa; margin-top: 4px; align-items: center; flex-wrap: wrap; }
 
-/* Matéria só com manchete (sem corpo): centraliza o conteúdo no card,
-   já que não há resumo pra preencher o espaço. */
 .article-card.no-body .card-body { justify-content: center; }
 .featured-card.no-body .featured-body { justify-content: center; }
 
-/* ── Capa de vídeo: primeiro frame + botão de play ── */
 .video-cover { position: relative; overflow: hidden; }
 .video-cover-media {
   width: 100%; height: 100%;
@@ -213,12 +202,11 @@ button { display: flex; align-items: center; justify-content: center; text-align
   width: 56px; height: 56px; border-radius: 50%;
   background: rgba(0,0,0,0.55); border: 2px solid rgba(255,255,255,0.85);
   display: flex; align-items: center; justify-content: center;
-  padding-left: 4px; /* centraliza o triângulo */
+  padding-left: 4px;
   transition: background 0.2s, transform 0.2s;
 }
 .video-cover:hover .video-play-badge { background: rgba(0,0,0,0.72); transform: translate(-50%, -50%) scale(1.05); }
 
-/* ── Lightbox: imagem/vídeo ampliado ── */
 .img-lightbox {
   position: fixed; inset: 0; z-index: 1000;
   background: rgba(0,0,0,0.82);
@@ -228,7 +216,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
 .img-lightbox-img {
   max-width: 90vw; max-height: 90vh;
   width: auto; height: auto;
-  object-fit: contain; /* mostra a imagem/vídeo inteiro, sem cortar */
+  object-fit: contain;
   border-radius: 8px; box-shadow: 0 8px 40px rgba(0,0,0,0.5);
   cursor: default; background: #000;
 }
@@ -242,14 +230,12 @@ button { display: flex; align-items: center; justify-content: center; text-align
 }
 .img-lightbox-close:hover { background: rgba(255,255,255,0.3); }
 
-/* Telas estreitas: destaque e cards viram coluna (capa em cima) */
 @media (max-width: 680px) {
   .featured-card { flex-direction: column; }
   .featured-cover { width: 100%; min-width: 0; height: 200px; }
   .featured-body { padding: 24px 22px; }
   .article-card { flex-direction: column; }
   .card-cover { width: 100%; min-height: 160px; height: 160px; }
-  /* no celular a imagem/vídeo cabe na tela (fit) */
   .img-lightbox { padding: 16px; }
   .img-lightbox-img { max-width: 96vw; max-height: 86vh; }
 }
@@ -277,27 +263,25 @@ button { display: flex; align-items: center; justify-content: center; text-align
   flex-shrink: 0; position: relative;
 }
 
-/* ── Botões de like / dislike ── */
 .vote-group { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
 
 .vote-btn {
   display: flex; align-items: center; gap: 6px;
   background: none; border: 1px solid #ccc; border-radius: 999px;
   padding: 5px 12px; cursor: pointer;
-  color: #888; /* símbolo cinza no estado estático */
+  color: #888;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
   font-family: 'DM Sans', sans-serif;
 }
 .vote-btn svg { fill: currentColor; display: block; }
 .vote-btn .vote-count {
   font-size: 11px; font-weight: 500;
-  color: #aaa; /* mesma cor do texto do autor no card */
+  color: #aaa;
   line-height: 1;
 }
 .vote-btn:hover:not(:disabled) { border-color: #999; }
 .vote-btn:disabled { cursor: default; opacity: 0.85; }
 
-/* estado selecionado: vermelho do banner, símbolo branco */
 .vote-btn.active {
   background: #FF1E2D; border-color: #FF1E2D; color: #fff;
 }

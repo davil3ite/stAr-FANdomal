@@ -61,8 +61,6 @@ async function hydrateAuthors(articles) {
   });
 }
 
-// ── Artigos ───────────────────────────────────────────────────────────────────
-
 export async function getArticles() {
   const { data, error } = await supabase
     .from("articles")
@@ -132,17 +130,11 @@ export function timeAgo(isoString) {
   return new Date(isoString).toLocaleDateString("pt-BR");
 }
 
-// ── Votos (like / dislike) ──────────────────────────────────────────────────────
-
-// Pega o id do usuário logado no Supabase Auth (null se deslogado).
 async function getAuthUserId() {
   const { data } = await supabase.auth.getSession();
   return data?.session?.user?.id || null;
 }
 
-// Devolve um mapa { [article_id]: 'like' | 'dislike' } com os votos
-// do usuário logado. Se estiver deslogado, devolve {} (sem votos).
-// 1 query só — usada pra pintar os botões no hub e na página do artigo.
 export async function getMyVotes() {
   const uid = await getAuthUserId();
   if (!uid) return {};
@@ -156,18 +148,10 @@ export async function getMyVotes() {
   return map;
 }
 
-// Vota num artigo.
-//   value = 'like'     -> marca like (troca se já tinha dislike)
-//   value = 'dislike'  -> marca dislike (troca se já tinha like)
-//   value = null       -> tira o voto
-// A recontagem dos totais (colunas like/dislike na articles) é feita
-// automaticamente pela trigger no banco.
-// Retorna { ok, value } com o voto FINAL ('like' | 'dislike' | null).
 export async function castVote(articleId, value) {
   const uid = await getAuthUserId();
   if (!uid) return { ok: false, reason: "not_logged" };
 
-  // Tirar o voto
   if (value === null) {
     const { error } = await supabase
       .from("votes")
@@ -178,7 +162,6 @@ export async function castVote(articleId, value) {
     return { ok: true, value: null };
   }
 
-  // Marcar/trocar: upsert pela chave (user_id, article_id)
   const { error } = await supabase
     .from("votes")
     .upsert(
@@ -189,8 +172,6 @@ export async function castVote(articleId, value) {
   return { ok: true, value };
 }
 
-// Lê os totais atualizados (like/dislike) de UM artigo direto do banco.
-// Útil pra sincronizar os números depois de votar.
 export async function getArticleCounts(articleId) {
   const { data, error } = await supabase
     .from("articles")
@@ -201,10 +182,6 @@ export async function getArticleCounts(articleId) {
   return { like: data.like || 0, dislike: data.dislike || 0 };
 }
 
-// ── Matéria em destaque ─────────────────────────────────────────────────────────
-
-// Pega o artigo marcado como destaque (featured = true), já com autor resolvido.
-// Devolve null se não houver nenhum destaque.
 export async function getFeaturedArticle() {
   const { data, error } = await supabase
     .from("articles")
@@ -217,11 +194,6 @@ export async function getFeaturedArticle() {
   return hydrated;
 }
 
-// Define (ou troca) a matéria em destaque. Chama a função do banco, que
-// desmarca o destaque anterior e marca o novo numa transação só.
-//   articleId = uuid  -> marca esse artigo como destaque
-//   articleId = null  -> tira o destaque atual (fica sem destaque)
-// Só adm+ consegue (a função no banco barra os outros). Retorna { ok }.
 export async function setFeaturedArticle(articleId) {
   const { error } = await supabase.rpc("set_featured_article", {
     p_article_id: articleId,
