@@ -30,9 +30,17 @@ export async function uploadVideo(file, pasta = "videos") {
 
   const { error } = await supabase.storage
     .from(BUCKET)
-    .upload(nome, file, { cacheControl: "3600", upsert: false });
+    .upload(nome, file, {
+      cacheControl: "3600",
+      upsert: false,
+      contentType: file.type || "video/mp4",
+    });
 
-  if (error) return { ok: false };
+  if (error) {
+    // Mostra o motivo real do erro no console pra diagnóstico.
+    console.error("uploadVideo falhou:", error);
+    return { ok: false, reason: error.message || "upload_error" };
+  }
 
   const { data } = supabase.storage.from(BUCKET).getPublicUrl(nome);
   return { ok: true, url: data.publicUrl };
