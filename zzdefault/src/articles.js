@@ -83,7 +83,7 @@ export async function getArticleById(id) {
   return hydrated;
 }
 
-export async function createArticle({ type, theme, headline, body, coverImage, images, sources, author, coauthors, editionId }) {
+export async function createArticle({ type, theme, headline, body, coverImage, images, sources, author, coauthors, editionId, isVideo, videoUrl }) {
   const { data, error } = await supabase.from("articles").insert({
     type,
     theme: theme || null,
@@ -94,6 +94,8 @@ export async function createArticle({ type, theme, headline, body, coverImage, i
     author,
     coauthors: coauthors || null,
     edition_id: editionId || null,
+    is_video: !!isVideo,
+    video_url: videoUrl || null,
   }).select().single();
   if (error) return null;
   return data;
@@ -109,6 +111,8 @@ export async function updateArticle(id, fields) {
     sources: fields.sources,
     coauthors: fields.coauthors || null,
     edition_id: fields.editionId || null,
+    is_video: !!fields.isVideo,
+    video_url: fields.videoUrl || null,
     updated_at: new Date().toISOString(),
   }).eq("id", id).select().single();
   if (error) return null;

@@ -201,7 +201,24 @@ button { display: flex; align-items: center; justify-content: center; text-align
 .article-card.no-body .card-body { justify-content: center; }
 .featured-card.no-body .featured-body { justify-content: center; }
 
-/* ── Lightbox: imagem da capa ampliada ── */
+/* ── Capa de vídeo: primeiro frame + botão de play ── */
+.video-cover { position: relative; overflow: hidden; }
+.video-cover-media {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  background: #111; pointer-events: none;
+}
+.video-play-badge {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 56px; height: 56px; border-radius: 50%;
+  background: rgba(0,0,0,0.55); border: 2px solid rgba(255,255,255,0.85);
+  display: flex; align-items: center; justify-content: center;
+  padding-left: 4px; /* centraliza o triângulo */
+  transition: background 0.2s, transform 0.2s;
+}
+.video-cover:hover .video-play-badge { background: rgba(0,0,0,0.72); transform: translate(-50%, -50%) scale(1.05); }
+
+/* ── Lightbox: imagem/vídeo ampliado ── */
 .img-lightbox {
   position: fixed; inset: 0; z-index: 1000;
   background: rgba(0,0,0,0.82);
@@ -211,9 +228,9 @@ button { display: flex; align-items: center; justify-content: center; text-align
 .img-lightbox-img {
   max-width: 90vw; max-height: 90vh;
   width: auto; height: auto;
-  object-fit: contain; /* mostra a imagem inteira, sem cortar */
+  object-fit: contain; /* mostra a imagem/vídeo inteiro, sem cortar */
   border-radius: 8px; box-shadow: 0 8px 40px rgba(0,0,0,0.5);
-  cursor: default;
+  cursor: default; background: #000;
 }
 .img-lightbox-close {
   position: fixed; top: 20px; right: 24px;
@@ -232,7 +249,7 @@ button { display: flex; align-items: center; justify-content: center; text-align
   .featured-body { padding: 24px 22px; }
   .article-card { flex-direction: column; }
   .card-cover { width: 100%; min-height: 160px; height: 160px; }
-  /* no celular a imagem cabe na tela (fit) */
+  /* no celular a imagem/vídeo cabe na tela (fit) */
   .img-lightbox { padding: 16px; }
   .img-lightbox-img { max-width: 96vw; max-height: 86vh; }
 }

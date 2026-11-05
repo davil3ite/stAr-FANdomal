@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getSession } from "../auth.js";
 import { createArticle, updateArticle, getArticleById, setFeaturedArticle } from "../articles.js";
-import { uploadImage } from "../storage.js";
+import { uploadImage, uploadVideo } from "../storage.js";
 import supabase from "../supabase.js";
 import "./css/write.css";
 
@@ -395,15 +395,21 @@ function Write() {
 
   const [anonymous, setAnonymous] = useState(false);
   // Matéria em destaque — só adm+ vê/usa.
-  // featured = estado atual do checkbox; wasFeatured = como estava ao abrir
-  // (pra saber, ao salvar, se precisamos tirar o destaque deste artigo).
   const [featured, setFeatured] = useState(false);
   const [wasFeatured, setWasFeatured] = useState(false);
   const isAdmPlus = session?.type === "adm+";
 
+  // ── Vídeo ──
+  // isVideo = a postagem é um vídeo (esconde texto + imagem de capa).
+  const [isVideo, setIsVideo] = useState(false);
+  const [videoUrl, setVideoUrl] = useState("");      // URL já salva (edição)
+  const [videoPreview, setVideoPreview] = useState(""); // preview local (objectURL) ou URL salva
+  const [videoFile, setVideoFile] = useState(null);     // arquivo novo a subir
+
   const bodyRef = useRef(null);
   const coverInputRef = useRef(null);
   const inlineInputRef = useRef(null);
+  const videoInputRef = useRef(null);
   const themeOverflowRef = useRef(null);
 
   useEffect(() => {
@@ -422,6 +428,9 @@ function Write() {
           if (a.author === "anonymous") setAnonymous(true);
           setFeatured(!!a.featured);
           setWasFeatured(!!a.featured);
+          setIsVideo(!!a.is_video);
+          setVideoUrl(a.video_url || "");
+          setVideoPreview(a.video_url || "");
           if (bodyRef.current) bodyRef.current.innerHTML = a.body;
         }
       });
@@ -500,6 +509,13 @@ function Write() {
     setCoverPreview(URL.createObjectURL(file));
   }
 
+  function handleVideoChange(e) {
+    const file = e.target.files[0]; if (!file) return;
+    setVideoFile(file);
+    setVideoPreview(URL.createObjectURL(file));
+    setError("");
+  }
+
   async function handleInlineImage(e) {
     const file = e.target.files[0]; if (!file) return;
     const up = await uploadImage(file, "conteudo");
@@ -532,14 +548,12 @@ function Write() {
       setError("Sessão inválida. Faça login novamente e tente de novo.");
       return;
     }
-    setPublishing(true);
-
-    let coverUrl = coverImage;
-    if (coverFile) {
-      const up = await uploadImage(coverFile, "capas");
-      if (!up.ok) { setError("Erro ao enviar a imagem de capa."); setPublishing(false); return; }
-      coverUrl = up.url;
+    // Se é vídeo, precisa ter um vídeo (novo ou já salvo).
+    if (isVideo && !videoFile && !videoUrl) {
+      setError("Envie um vídeo para publicar.");
+      return;
     }
+    setPublishing(true);
 
     const authorData = anonymous
       ? "anonymous"
@@ -549,18 +563,53 @@ function Write() {
       ? coauthors.map(c => (c.id != null ? { id: c.id } : c))
       : null;
 
-    const data = {
-      type,
-      theme,
-      headline: headline.trim(),
-      body,
-      coverImage: coverUrl,
-      images: [],
-      sources: sources.filter(s => s.url.trim()),
-      author: authorData,
-      coauthors: anonymous ? null : coauthorRefs,
-      editionId: null,
-    };
+    // Monta os campos de conteúdo conforme seja vídeo ou texto.
+    let data;
+    if (isVideo) {
+      // Sobe o vídeo novo, se houver.
+      let vUrl = videoUrl;
+      if (videoFile) {
+        const up = await uploadVideo(videoFile, "videos");
+        if (!up.ok) { setError("Erro ao enviar o vídeo."); setPublishing(false); return; }
+        vUrl = up.url;
+      }
+      data = {
+        type,
+        theme,
+        headline: headline.trim(),
+        body: "",            // vídeo não tem corpo de texto
+        coverImage: "",      // nem imagem de capa
+        images: [],
+        sources: sources.filter(s => s.url.trim()),
+        author: authorData,
+        coauthors: anonymous ? null : coauthorRefs,
+        editionId: null,
+        isVideo: true,
+        videoUrl: vUrl,
+      };
+    } else {
+      // Matéria normal (texto + imagem de capa).
+      let coverUrl = coverImage;
+      if (coverFile) {
+        const up = await uploadImage(coverFile, "capas");
+        if (!up.ok) { setError("Erro ao enviar a imagem de capa."); setPublishing(false); return; }
+        coverUrl = up.url;
+      }
+      data = {
+        type,
+        theme,
+        headline: headline.trim(),
+        body,
+        coverImage: coverUrl,
+        images: [],
+        sources: sources.filter(s => s.url.trim()),
+        author: authorData,
+        coauthors: anonymous ? null : coauthorRefs,
+        editionId: null,
+        isVideo: false,
+        videoUrl: null,
+      };
+    }
 
     // Salva o artigo e guarda o id (pra poder marcar/desmarcar o destaque).
     let articleId = id;
@@ -572,10 +621,6 @@ function Write() {
     }
 
     // Destaque: só adm+ consegue mexer.
-    //  - checkbox ligado  -> marca este como destaque (desmarca o anterior)
-    //  - checkbox desligado E este ERA o destaque -> tira o destaque
-    //  - checkbox desligado e não era o destaque -> não mexe em nada
-    //    (importante: senão apagaria o destaque de outro artigo)
     if (isAdmPlus && articleId) {
       if (featured) {
         await setFeaturedArticle(articleId);
@@ -610,29 +655,42 @@ function Write() {
       <main className="write-content">
         <div className="write-card">
 
-          {isAdmPlus && (
-            <div className="write-toggles">
-              <label className="anonymous-checkbox-label">
-                <input
-                  type="checkbox"
-                  className="anonymous-checkbox"
-                  checked={anonymous}
-                  onChange={handleAnonymousToggle}
-                />
-                <span>Autoria Anônima</span>
-              </label>
+          <div className="write-toggles">
+            {isAdmPlus && (
+              <>
+                <label className="anonymous-checkbox-label">
+                  <input
+                    type="checkbox"
+                    className="anonymous-checkbox"
+                    checked={anonymous}
+                    onChange={handleAnonymousToggle}
+                  />
+                  <span>Autoria Anônima</span>
+                </label>
 
-              <label className="anonymous-checkbox-label">
-                <input
-                  type="checkbox"
-                  className="anonymous-checkbox"
-                  checked={featured}
-                  onChange={() => setFeatured(v => !v)}
-                />
-                <span>Matéria em destaque ★</span>
-              </label>
-            </div>
-          )}
+                <label className="anonymous-checkbox-label">
+                  <input
+                    type="checkbox"
+                    className="anonymous-checkbox"
+                    checked={featured}
+                    onChange={() => setFeatured(v => !v)}
+                  />
+                  <span>Matéria em destaque ★</span>
+                </label>
+              </>
+            )}
+
+            {/* Checkbox "É vídeo?" — disponível pra qualquer adm */}
+            <label className="anonymous-checkbox-label">
+              <input
+                type="checkbox"
+                className="anonymous-checkbox"
+                checked={isVideo}
+                onChange={() => { setIsVideo(v => !v); setError(""); }}
+              />
+              <span>Postagem de vídeo 🎬</span>
+            </label>
+          </div>
 
           <div className="write-title-row">
             <h1 className="write-title">{id ? "Editar matéria" : "Nova matéria"}</h1>
@@ -697,43 +755,59 @@ function Write() {
             <input type="text" placeholder="Título da matéria" value={headline} onChange={e => { setHeadline(e.target.value); setError(""); }} />
           </div>
 
-          <div className="write-field">
-            <label>Imagem de capa</label>
-            <input ref={coverInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleCoverChange} />
-            <button className="file-btn" onClick={() => coverInputRef.current.click()}>
-              {coverPreview ? "Trocar imagem de capa" : "Escolher imagem de capa"}
-            </button>
-            {coverPreview && <img src={coverPreview} alt="capa" className="cover-preview" />}
-          </div>
-
-          <div className="write-field">
-            <label>Texto</label>
-            <div className="editor-toolbar">
-              <button className={activeFormats.b ? "active" : ""} onMouseDown={e => handleFormat(e, "b")}><b>B</b></button>
-              <button className={activeFormats.i ? "active" : ""} onMouseDown={e => handleFormat(e, "i")}><i>I</i></button>
-              <button className={activeFormats.u ? "active" : ""} onMouseDown={e => handleFormat(e, "u")}><u>U</u></button>
-              <span className="toolbar-sep" />
-              <button onMouseDown={e => handleAlign(e, "Left")} className={activeAlign === "Left" ? "active" : ""} title="Alinhar à esquerda"><IconAlignLeft /></button>
-              <button onMouseDown={e => handleAlign(e, "Center")} className={activeAlign === "Center" ? "active" : ""} title="Centralizar"><IconAlignCenter /></button>
-              <button onMouseDown={e => handleAlign(e, "Right")} className={activeAlign === "Right" ? "active" : ""} title="Alinhar à direita"><IconAlignRight /></button>
-              <button onMouseDown={e => handleAlign(e, "Full")} className={activeAlign === "Full" ? "active" : ""} title="Justificar"><IconAlignJustify /></button>
-              <span className="toolbar-sep" />
-              <button onMouseDown={e => { e.preventDefault(); inlineInputRef.current.click(); }}>🖼</button>
-              <input ref={inlineInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleInlineImage} />
+          {/* ── Conteúdo: VÍDEO ou (imagem de capa + texto) ── */}
+          {isVideo ? (
+            <div className="write-field">
+              <label>Vídeo</label>
+              <input ref={videoInputRef} type="file" accept="video/*" style={{ display: "none" }} onChange={handleVideoChange} />
+              <button className="file-btn" onClick={() => videoInputRef.current.click()}>
+                {videoPreview ? "Trocar vídeo" : "Escolher vídeo"}
+              </button>
+              {videoPreview && (
+                <video src={videoPreview} className="video-preview" controls preload="metadata" />
+              )}
             </div>
-            <div
-              ref={bodyRef}
-              className="editor-body"
-              contentEditable
-              suppressContentEditableWarning
-              onInput={handleBodyChange}
-              onPaste={handlePaste}
-              onKeyDown={handleKeyDown}
-              onKeyUp={updateActiveFormats}
-              onMouseUp={updateActiveFormats}
-              data-placeholder="Escreva sua matéria aqui..."
-            />
-          </div>
+          ) : (
+            <>
+              <div className="write-field">
+                <label>Imagem de capa</label>
+                <input ref={coverInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleCoverChange} />
+                <button className="file-btn" onClick={() => coverInputRef.current.click()}>
+                  {coverPreview ? "Trocar imagem de capa" : "Escolher imagem de capa"}
+                </button>
+                {coverPreview && <img src={coverPreview} alt="capa" className="cover-preview" />}
+              </div>
+
+              <div className="write-field">
+                <label>Texto</label>
+                <div className="editor-toolbar">
+                  <button className={activeFormats.b ? "active" : ""} onMouseDown={e => handleFormat(e, "b")}><b>B</b></button>
+                  <button className={activeFormats.i ? "active" : ""} onMouseDown={e => handleFormat(e, "i")}><i>I</i></button>
+                  <button className={activeFormats.u ? "active" : ""} onMouseDown={e => handleFormat(e, "u")}><u>U</u></button>
+                  <span className="toolbar-sep" />
+                  <button onMouseDown={e => handleAlign(e, "Left")} className={activeAlign === "Left" ? "active" : ""} title="Alinhar à esquerda"><IconAlignLeft /></button>
+                  <button onMouseDown={e => handleAlign(e, "Center")} className={activeAlign === "Center" ? "active" : ""} title="Centralizar"><IconAlignCenter /></button>
+                  <button onMouseDown={e => handleAlign(e, "Right")} className={activeAlign === "Right" ? "active" : ""} title="Alinhar à direita"><IconAlignRight /></button>
+                  <button onMouseDown={e => handleAlign(e, "Full")} className={activeAlign === "Full" ? "active" : ""} title="Justificar"><IconAlignJustify /></button>
+                  <span className="toolbar-sep" />
+                  <button onMouseDown={e => { e.preventDefault(); inlineInputRef.current.click(); }}>🖼</button>
+                  <input ref={inlineInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleInlineImage} />
+                </div>
+                <div
+                  ref={bodyRef}
+                  className="editor-body"
+                  contentEditable
+                  suppressContentEditableWarning
+                  onInput={handleBodyChange}
+                  onPaste={handlePaste}
+                  onKeyDown={handleKeyDown}
+                  onKeyUp={updateActiveFormats}
+                  onMouseUp={updateActiveFormats}
+                  data-placeholder="Escreva sua matéria aqui..."
+                />
+              </div>
+            </>
+          )}
 
           <div className="write-field">
             <label>Fontes <span className="optional">(opcional)</span></label>

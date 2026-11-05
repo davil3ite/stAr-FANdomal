@@ -97,6 +97,19 @@ function VoteButtons({ likes, dislikes, myVote, onVote, logged }) {
   );
 }
 
+/* ── Prévia de vídeo no card: primeiro frame + botão de play ── */
+function VideoThumb({ url, onOpen }) {
+  // O <video> mostra o primeiro frame como prévia estática (sem autoplay).
+  return (
+    <div className="card-cover video-cover" onClick={() => onOpen(url)} title="Reproduzir vídeo">
+      <video src={url} className="video-cover-media" preload="metadata" muted playsInline />
+      <div className="video-play-badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5v14l11-7z" fill="#fff"/></svg>
+      </div>
+    </div>
+  );
+}
+
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
@@ -106,8 +119,8 @@ function Layout() {
   const [myVotes, setMyVotes] = useState({});
   // matéria em destaque marcada por adm+ (ou null se ninguém marcou)
   const [featured, setFeatured] = useState(null);
-  // URL da imagem aberta ampliada (lightbox), ou null se nenhuma
-  const [zoomImg, setZoomImg] = useState(null);
+  // lightbox aberto: { url, isVideo } ou null
+  const [lightbox, setLightbox] = useState(null);
 
   useEffect(() => {
     Promise.all([getArticles(), getMyVotes(), getFeaturedArticle()])
@@ -118,18 +131,17 @@ function Layout() {
       });
   }, []);
 
-  // Abre a capa ampliada (lightbox).
-  function openZoom(url) {
-    if (url) setZoomImg(url);
-  }
+  // Abre o lightbox (imagem ou vídeo).
+  function openImage(url) { if (url) setLightbox({ url, isVideo: false }); }
+  function openVideo(url) { if (url) setLightbox({ url, isVideo: true }); }
 
   // Fecha o lightbox ao apertar Esc.
   useEffect(() => {
-    if (!zoomImg) return;
-    function onKey(e) { if (e.key === "Escape") setZoomImg(null); }
+    if (!lightbox) return;
+    function onKey(e) { if (e.key === "Escape") setLightbox(null); }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [zoomImg]);
+  }, [lightbox]);
 
   function handleLogout() { logout(); setSession(null); navigate('/'); }
 
@@ -205,22 +217,29 @@ function Layout() {
     // Texto do corpo sem HTML. Se vazio (matéria só com manchete),
     // não mostra o resumo nem os "..." — o card centraliza o conteúdo.
     const plainBody = (a.body || "").replace(/<[^>]+>/g, '').trim();
+    const isVideo = !!a.is_video && !!a.video_url;
+    // vídeo não tem corpo, então trata como "no-body" (centraliza)
+    const noBody = isVideo || !plainBody;
     return (
-      <div className={`article-card ${plainBody ? "" : "no-body"}`} key={a.id}>
-        {a.cover_image && (
-          <div
-            className="card-cover"
-            style={{ backgroundImage: `url(${a.cover_image})` }}
-            onClick={() => openZoom(a.cover_image)}
-            title="Ampliar imagem"
-          />
+      <div className={`article-card ${noBody ? "no-body" : ""}`} key={a.id}>
+        {isVideo ? (
+          <VideoThumb url={a.video_url} onOpen={openVideo} />
+        ) : (
+          a.cover_image && (
+            <div
+              className="card-cover"
+              style={{ backgroundImage: `url(${a.cover_image})` }}
+              onClick={() => openImage(a.cover_image)}
+              title="Ampliar imagem"
+            />
+          )
         )}
         <div className="card-body">
           <span className="card-type">
             {a.type}{a.theme ? ` • ${a.theme}` : ""}
           </span>
           <h2 className="card-headline">{a.headline}</h2>
-          {plainBody && <p className="card-excerpt">{plainBody}</p>}
+          {!isVideo && plainBody && <p className="card-excerpt">{plainBody}</p>}
           <div className="card-meta">
             <AuthorAvatars author={a.author} coauthors={a.coauthors} />
             <span>{formatAuthorsText(a.author, a.coauthors)}</span>
@@ -248,8 +267,10 @@ function Layout() {
   const isRealFeatured = !!featured;
   const topArticle = featured || (articles.length > 0 ? articles[0] : null);
 
-  // Resumo do destaque (vazio quando a matéria é só manchete).
-  const topPlainBody = topArticle ? (topArticle.body || "").replace(/<[^>]+>/g, '').trim() : "";
+  const topIsVideo = topArticle ? (!!topArticle.is_video && !!topArticle.video_url) : false;
+  // Resumo do destaque (vazio quando é vídeo ou matéria só com manchete).
+  const topPlainBody = (topArticle && !topIsVideo) ? (topArticle.body || "").replace(/<[^>]+>/g, '').trim() : "";
+  const topNoBody = topIsVideo || !topPlainBody;
 
   // Lista de baixo: todas menos a do topo (pra não repetir)
   const restArticles = topArticle
@@ -338,14 +359,23 @@ function Layout() {
                 <span className="section-head-line" />
               </div>
 
-              <div className={`featured-card ${topPlainBody ? "" : "no-body"}`}>
-                {topArticle.cover_image && (
-                  <div
-                    className="featured-cover"
-                    style={{ backgroundImage: `url(${topArticle.cover_image})` }}
-                    onClick={() => openZoom(topArticle.cover_image)}
-                    title="Ampliar imagem"
-                  />
+              <div className={`featured-card ${topNoBody ? "no-body" : ""}`}>
+                {topIsVideo ? (
+                  <div className="featured-cover video-cover" onClick={() => openVideo(topArticle.video_url)} title="Reproduzir vídeo">
+                    <video src={topArticle.video_url} className="video-cover-media" preload="metadata" muted playsInline />
+                    <div className="video-play-badge" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="34" height="34"><path d="M8 5v14l11-7z" fill="#fff"/></svg>
+                    </div>
+                  </div>
+                ) : (
+                  topArticle.cover_image && (
+                    <div
+                      className="featured-cover"
+                      style={{ backgroundImage: `url(${topArticle.cover_image})` }}
+                      onClick={() => openImage(topArticle.cover_image)}
+                      title="Ampliar imagem"
+                    />
+                  )
                 )}
                 <div className="featured-body">
                   <span className="card-type">
@@ -394,16 +424,27 @@ function Layout() {
         )}
       </main>
 
-      {/* ── Lightbox: imagem ampliada ── */}
-      {zoomImg && (
-        <div className="img-lightbox" onClick={() => setZoomImg(null)}>
-          <button className="img-lightbox-close" onClick={() => setZoomImg(null)} aria-label="Fechar">✕</button>
-          <img
-            src={zoomImg}
-            alt=""
-            className="img-lightbox-img"
-            onClick={e => e.stopPropagation()}
-          />
+      {/* ── Lightbox: imagem ou vídeo ampliado ── */}
+      {lightbox && (
+        <div className="img-lightbox" onClick={() => setLightbox(null)}>
+          <button className="img-lightbox-close" onClick={() => setLightbox(null)} aria-label="Fechar">✕</button>
+          {lightbox.isVideo ? (
+            <video
+              src={lightbox.url}
+              className="img-lightbox-img"
+              controls
+              autoPlay
+              playsInline
+              onClick={e => e.stopPropagation()}
+            />
+          ) : (
+            <img
+              src={lightbox.url}
+              alt=""
+              className="img-lightbox-img"
+              onClick={e => e.stopPropagation()}
+            />
+          )}
         </div>
       )}
 
